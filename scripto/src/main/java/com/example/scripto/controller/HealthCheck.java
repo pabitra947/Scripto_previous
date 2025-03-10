@@ -1,2 +1,3 @@
-package com.example.scripto.controller;public class HealthCheck {
+package com.example.scripto.controller;
+public class HealthCheck {
 }
