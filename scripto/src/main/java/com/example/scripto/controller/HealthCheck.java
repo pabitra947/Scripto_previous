@@ -9,6 +9,7 @@ public class HealthCheck {
     @GetMapping("/health")
     public String display()
     {
-        return "Everything is Good!!";
+
+        return "All is Well !!";
     }
 }
