@@ -45,6 +45,7 @@ public class BookListing implements Serializable {
     @NonNull
     private String imageUrl;
 
+
     // 🟢 Optional: calculates how many are still available
     public int getAvailableQuantity() {
         return totalQuantity - soldQuantity;

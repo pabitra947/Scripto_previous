@@ -1,9 +1,7 @@
 package com.example.scripto.implementation;
 
-import com.example.scripto.dto.BookDto;
+import com.example.scripto.dto.*;
 
-import com.example.scripto.dto.BookResponseDto;
-import com.example.scripto.dto.EditBookDto;
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.repository.BookListingRepo;
 import com.example.scripto.service.IBookListing;
@@ -131,6 +129,41 @@ public class BookListingImpl implements IBookListing {
             ).collect(Collectors.toList());
 
             return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+    //Used to find the book based on the book name
+    @Override
+    public ResponseEntity<List<BookResponseByBookNameDto>> findBookByBookName(String book){
+        try {
+            List<BookListing> allBookByBookName = bookListingRepo.findBookByBookName(book);
+
+            if(allBookByBookName != null){
+                List<BookResponseByBookNameDto> books = allBookByBookName.stream().map(
+                        booked -> new BookResponseByBookNameDto(
+                                booked.getBookId(),
+                                booked.getAuthorName(),
+                                booked.getPrice(),
+                                booked.getTotalQuantity(),
+                                booked.getSoldQuantity(),
+                                booked.getAvailableQuantity(),  // custom calculated field from getter
+                                booked.getBookDetails(),
+                                booked.getImageUrl(),
+                                booked.getCreatedDateAndTime()
+                        )
+                ).collect(Collectors.toList());
+
+                return new ResponseEntity<>(books, HttpStatus.OK);
+            }
+            else {
+                throw new RuntimeException("This name book is not present");
+            }
 
         } catch (Exception e){
             e.printStackTrace();

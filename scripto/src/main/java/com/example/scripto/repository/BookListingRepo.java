@@ -1,7 +1,6 @@
 package com.example.scripto.repository;
 
 import com.example.scripto.entity.BookListing;
-import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,6 +29,11 @@ public interface BookListingRepo extends JpaRepository<BookListing, Long> {
             "FROM bookinfo " +
             "GROUP BY book_name, author_name; ", nativeQuery = true)
     List<BookListing> findAllUniqueBook();
+
+
+    @Query(value = "SELECT * FROM bookinfo WHERE book_name = :bookName", nativeQuery = true)
+    List<BookListing> findBookByBookName(@Param("bookName") String bookName);
+
 }
 
 

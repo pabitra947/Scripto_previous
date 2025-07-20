@@ -1,9 +1,7 @@
 package com.example.scripto.service;
 
 
-import com.example.scripto.dto.BookDto;
-import com.example.scripto.dto.BookResponseDto;
-import com.example.scripto.dto.EditBookDto;
+import com.example.scripto.dto.*;
 import com.example.scripto.entity.BookListing;
 import org.springframework.http.ResponseEntity;
 
@@ -18,6 +16,8 @@ public interface IBookListing {
     ResponseEntity<?> deleteBookById(long id);
 
     ResponseEntity<List<BookResponseDto>> findAllUniqueBook();
+
+    ResponseEntity<List<BookResponseByBookNameDto>> findBookByBookName(String book);
 }
 
 
