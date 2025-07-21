@@ -2,7 +2,6 @@ package com.example.scripto.repository;
 
 import com.example.scripto.entity.BookListing;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -34,6 +33,20 @@ public interface BookListingRepo extends JpaRepository<BookListing, Long> {
     @Query(value = "SELECT * FROM bookinfo WHERE book_name = :bookName", nativeQuery = true)
     List<BookListing> findBookByBookName(@Param("bookName") String bookName);
 
+
+    @Query(value = "SELECT * FROM bookinfo b WHERE LOWER(b.author_name) LIKE LOWER(CONCAT('%', :authorName, '%'))", nativeQuery = true)
+    List<BookListing> findBookByAuthorName(@Param("authorName") String authorName);
+
+
+    @Query(value = "SELECT * FROM bookinfo as b WHERE b.price <= :price", nativeQuery = true)
+    List<BookListing> findBooksCheaperThanThePrice(@Param("price") Double price);
+
+
+    List<BookListing> findByPriceBetween(Double min, Double max);
+
+
+    @Query(value = "SELECT * FROM bookinfo as b WHERE b.price >= :price", nativeQuery = true)
+    List<BookListing> findBooksCostlierThanThePrice(@Param("price") Double price);
 }
 
 

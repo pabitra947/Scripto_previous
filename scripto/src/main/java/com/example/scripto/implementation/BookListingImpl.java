@@ -4,6 +4,10 @@ import com.example.scripto.dto.*;
 
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.repository.BookListingRepo;
+import com.example.scripto.response.admin.book.BookResponseByAuthorName;
+import com.example.scripto.response.admin.book.BookResponseByBookName;
+import com.example.scripto.response.admin.book.BookResponse;
+import com.example.scripto.response.admin.book.BookResponseOnPrice;
 import com.example.scripto.service.IBookListing;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
@@ -109,12 +113,12 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find all the unique book
     @Override
-    public ResponseEntity<List<BookResponseDto>> findAllUniqueBook(){
+    public ResponseEntity<List<BookResponse>> findAllUniqueBook(){
         try {
             List<BookListing> books = bookListingRepo.findAllUniqueBook();
 
-            List<BookResponseDto> response = books.stream().map(
-                    book -> new BookResponseDto(
+            List<BookResponse> response = books.stream().map(
+                    book -> new BookResponse(
                             book.getBookId(),
                             book.getBookName(),
                             book.getAuthorName(),
@@ -140,13 +144,13 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find the book based on the book name
     @Override
-    public ResponseEntity<List<BookResponseByBookNameDto>> findBookByBookName(String book){
+    public ResponseEntity<List<BookResponseByBookName>> findBookByBookName(String book){
         try {
             List<BookListing> allBookByBookName = bookListingRepo.findBookByBookName(book);
 
             if(allBookByBookName != null){
-                List<BookResponseByBookNameDto> books = allBookByBookName.stream().map(
-                        booked -> new BookResponseByBookNameDto(
+                List<BookResponseByBookName> books = allBookByBookName.stream().map(
+                        booked -> new BookResponseByBookName(
                                 booked.getBookId(),
                                 booked.getAuthorName(),
                                 booked.getPrice(),
@@ -168,6 +172,142 @@ public class BookListingImpl implements IBookListing {
         } catch (Exception e){
             e.printStackTrace();
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+    //Used to find the book based on the Author name
+    @Override
+    public ResponseEntity<List<BookResponseByAuthorName>> findBookByAuthorName(String author){
+        try {
+            List<BookListing> allBookByAuthorName = bookListingRepo.findBookByAuthorName(author);
+
+            if(allBookByAuthorName != null){
+                List<BookResponseByAuthorName> books = allBookByAuthorName.stream().map(
+                        book -> new BookResponseByAuthorName(
+                                book.getBookId(),
+                                book.getBookName(),
+                                book.getPrice(),
+                                book.getTotalQuantity(),
+                                book.getSoldQuantity(),
+                                book.getAvailableQuantity(),  // custom calculated field from getter
+                                book.getBookDetails(),
+                                book.getImageUrl(),
+                                book.getCreatedDateAndTime()
+                        )
+                ).collect(Collectors.toList());
+
+                return new ResponseEntity<>(books, HttpStatus.OK);
+            }
+            else{
+                throw new RuntimeException("This author named book is not present.");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+    //Used to find the book on a particular price point
+    @Override
+    public ResponseEntity<List<BookResponseOnPrice>> findBookByCheaperThanThePrice(Double price){
+        try {
+            List<BookListing> allBookByPrice = bookListingRepo.findBooksCheaperThanThePrice(price);
+
+            if (!allBookByPrice.isEmpty()) {
+                List<BookResponseOnPrice> books = allBookByPrice.stream().map(
+                        book -> new BookResponseOnPrice(
+                                book.getBookId(),
+                                book.getBookName(),
+                                book.getAuthorName(),
+                                book.getPrice(),
+                                book.getTotalQuantity(),
+                                book.getSoldQuantity(),
+                                book.getAvailableQuantity(),  // custom calculated field from getter
+                                book.getBookDetails(),
+                                book.getImageUrl(),
+                                book.getCreatedDateAndTime()
+                        )
+                ).collect(Collectors.toList());
+                return new ResponseEntity<>(books, HttpStatus.OK);
+            }
+            else {
+                throw new RuntimeException("Below this price point no book is available.");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+    //Used to find the book on a particular price range 
+    @Override
+    public ResponseEntity<List<BookResponseOnPrice>> findBookByPriceRange(Double min, Double max){
+        try {
+            List<BookListing> allBookByPriceRange = bookListingRepo.findByPriceBetween(min, max);
+
+            if (!allBookByPriceRange.isEmpty()) {
+                List<BookResponseOnPrice> books = allBookByPriceRange.stream().map(
+                        book -> new BookResponseOnPrice(
+                                book.getBookId(),
+                                book.getBookName(),
+                                book.getAuthorName(),
+                                book.getPrice(),
+                                book.getTotalQuantity(),
+                                book.getSoldQuantity(),
+                                book.getAvailableQuantity(),  // custom calculated field from getter
+                                book.getBookDetails(),
+                                book.getImageUrl(),
+                                book.getCreatedDateAndTime()
+                        )
+                ).collect(Collectors.toList());
+                return new ResponseEntity<>(books, HttpStatus.OK);
+            }
+            else {
+                throw new RuntimeException("between this price point no book is available.");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
+
+    //Used to find the book Higher then the given price
+    @Override
+    public ResponseEntity<List<BookResponseOnPrice>> findBookByHigherThenThePrice(Double price){
+        try {
+            List<BookListing> allBookByPrice = bookListingRepo.findBooksCostlierThanThePrice(price);
+
+            if (!allBookByPrice.isEmpty()) {
+                List<BookResponseOnPrice> books = allBookByPrice.stream().map(
+                        book -> new BookResponseOnPrice(
+                                book.getBookId(),
+                                book.getBookName(),
+                                book.getAuthorName(),
+                                book.getPrice(),
+                                book.getTotalQuantity(),
+                                book.getSoldQuantity(),
+                                book.getAvailableQuantity(),  // custom calculated field from getter
+                                book.getBookDetails(),
+                                book.getImageUrl(),
+                                book.getCreatedDateAndTime()
+                        )
+                ).collect(Collectors.toList());
+                return new ResponseEntity<>(books, HttpStatus.OK);
+            }
+            else {
+                throw new RuntimeException("above this price point no book is available.");
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 }

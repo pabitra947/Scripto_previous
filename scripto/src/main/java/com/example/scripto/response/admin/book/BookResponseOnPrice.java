@@ -1,4 +1,4 @@
-package com.example.scripto.dto;
+package com.example.scripto.response.admin.book;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookResponseDto {
+public class BookResponseOnPrice {
     private Long bookId;
     private String bookName;
     private String authorName;
@@ -21,4 +21,3 @@ public class BookResponseDto {
     private String imageUrl;
     private LocalDateTime createdDateAndTime;
 }
-
