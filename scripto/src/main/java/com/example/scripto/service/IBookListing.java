@@ -1,10 +1,12 @@
 package com.example.scripto.service;
 
 
-import com.example.scripto.dto.BookDto;
-import com.example.scripto.dto.BookResponseDto;
-import com.example.scripto.dto.EditBookDto;
+import com.example.scripto.dto.*;
 import com.example.scripto.entity.BookListing;
+import com.example.scripto.response.admin.book.BookResponseByAuthorName;
+import com.example.scripto.response.admin.book.BookResponseByBookName;
+import com.example.scripto.response.admin.book.BookResponse;
+import com.example.scripto.response.admin.book.BookResponseOnPrice;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -17,7 +19,17 @@ public interface IBookListing {
 
     ResponseEntity<?> deleteBookById(long id);
 
-    ResponseEntity<List<BookResponseDto>> findAllUniqueBook();
+    ResponseEntity<List<BookResponse>> findAllUniqueBook();
+
+    ResponseEntity<List<BookResponseByBookName>> findBookByBookName(String book);
+
+    ResponseEntity<List<BookResponseByAuthorName>> findBookByAuthorName(String author);
+
+    ResponseEntity<List<BookResponseOnPrice>> findBookByCheaperThanThePrice(Double price);
+
+    ResponseEntity<List<BookResponseOnPrice>> findBookByPriceRange(Double min, Double max);
+
+    ResponseEntity<List<BookResponseOnPrice>> findBookByHigherThenThePrice(Double price);
 }
 
 
