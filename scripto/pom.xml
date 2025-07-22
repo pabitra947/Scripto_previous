@@ -72,11 +72,11 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- To enhance the security we use this dependency -->
-<!--		<dependency>-->
-<!--			<groupId>org.springframework.boot</groupId>-->
-<!--			<artifactId>spring-boot-starter-security</artifactId>-->
-<!--		</dependency>-->
+		<!-- Spring Boot Starter Security -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 
 		<!-- Used for sending a mail (Java Mail Sender) -->

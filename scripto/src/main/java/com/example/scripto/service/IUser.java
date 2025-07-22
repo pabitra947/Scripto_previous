@@ -11,9 +11,9 @@ public interface IUser {
 
     ResponseEntity<User> createNewUser(UserDto userDto);
 
-    ResponseEntity<User> updateUser(String email, UserUpdateDto updateDto);
+    ResponseEntity<User> updateUser(UserUpdateDto updateDto);
 
-    ResponseEntity<String> deleteUser(String email);
+    ResponseEntity<String> deleteUser();
 
     ResponseEntity<List<User>> getAllUsers();
 }

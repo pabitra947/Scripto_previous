@@ -46,6 +46,12 @@ public class BookListing implements Serializable {
     private String imageUrl;
 
 
+    //Link to the seller (User)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private User seller;
+
+
     // 🟢 Optional: calculates how many are still available
     public int getAvailableQuantity() {
         return totalQuantity - soldQuantity;

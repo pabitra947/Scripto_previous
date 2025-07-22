@@ -9,6 +9,10 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,6 +24,8 @@ public class UserServiceImpl implements IUser {
     @Autowired
     private UserRepository userRepository;
 
+    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     // create new user
     @Override
@@ -28,7 +34,7 @@ public class UserServiceImpl implements IUser {
            User user = new User();
            user.setFullName(userDto.getFullName()); // ✅ Set full name
            user.setEmail(userDto.getEmail());
-           user.setPassword(userDto.getPassword());
+           user.setPassword(passwordEncoder.encode(userDto.getPassword()));
            user.setRole(userDto.getRole().toUpperCase());
            user.setMobileNo(userDto.getMobileNo());
 
@@ -52,24 +58,29 @@ public class UserServiceImpl implements IUser {
 
     //for update the user password
     @Override
-    public ResponseEntity<User> updateUser(String email, UserUpdateDto updateDto) {
+    public ResponseEntity<User> updateUser(UserUpdateDto updateDto) {
         try {
-            User user = userRepository.findByEmail(email);
-            if (user == null) {
-                throw new RuntimeException("User Not Exist !!");
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
+
+            User oldUser = userRepository.findByEmail(email);
+            if(oldUser == null){
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            // ✅ Update full name if provided
+
+            // Update full name if provided
             if (updateDto.getFullName() != null && !updateDto.getFullName().isBlank()) {
-                user.setFullName(updateDto.getFullName());
+                oldUser.setFullName(updateDto.getFullName());
             }
 
-            // ✅ Update password if provided
+            // Update password if provided
             if (updateDto.getPassword() != null && !updateDto.getPassword().isBlank()) {
-                user.setPassword(updateDto.getPassword());
+//                oldUser.setPassword(updateDto.getPassword());
+                oldUser.setPassword(passwordEncoder.encode(updateDto.getPassword()));
             }
 
-            return new ResponseEntity<>(userRepository.save(user), HttpStatus.OK);
+            return new ResponseEntity<>(userRepository.save(oldUser), HttpStatus.OK);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,14 +92,17 @@ public class UserServiceImpl implements IUser {
     // for delete the user by email
     @Override
     @Transactional
-    public ResponseEntity<String> deleteUser(String email) {
+    public ResponseEntity<String> deleteUser() {
        try {
-           User user = userRepository.findByEmail(email);
-           if(user == null){
-               throw new RuntimeException("User Not Present !!");
+           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+           String email = authentication.getName();
+
+           User oldUser = userRepository.findByEmail(email);
+           if(oldUser == null){
+               return new ResponseEntity<>(HttpStatus.NOT_FOUND);
            }
 
-           userRepository.deleteUserByEmail(email);
+           userRepository.deleteByEmail(email);
 
            return new ResponseEntity<>("Deleted -_-",HttpStatus.OK);
        } catch (Exception e){

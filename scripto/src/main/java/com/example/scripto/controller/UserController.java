@@ -19,35 +19,19 @@ public class UserController {
 
 
 
-    // for create user
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody UserDto userDto) {
-        return userServiceImpl.createNewUser(userDto);
-    }
-
-
-
     // for update password
-    @PutMapping("/update/{email}")
-    public ResponseEntity<User> updateUser(@PathVariable String email, @RequestBody UserUpdateDto updateDto) {
-        return userServiceImpl.updateUser(email,updateDto);
+    @PutMapping("/update")
+    public ResponseEntity<User> updateUser(@RequestBody UserUpdateDto updateDto) {
+        return userServiceImpl.updateUser(updateDto);
     }
-
 
 
 
     // for delete user
     @DeleteMapping("/delete")
-    public ResponseEntity<String> deleteUser(@RequestParam String email) {
-        return userServiceImpl.deleteUser(email);
+    public ResponseEntity<String> deleteUser() {
+        return userServiceImpl.deleteUser();
     }
 
-
-
-    // for get all user from db
-    @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
-       return userServiceImpl.getAllUsers();
-    }
 
 }

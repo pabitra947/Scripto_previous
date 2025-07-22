@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
+import java.util.List;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -35,4 +37,10 @@ public class User {
     private String mobileNo;
 
     private String shopName; // Only set for SELLER
+
+
+    //One seller can add many books
+    @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
+    private List<BookListing> booksAdded;
+
 }
