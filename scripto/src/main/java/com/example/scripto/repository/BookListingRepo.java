@@ -47,6 +47,22 @@ public interface BookListingRepo extends JpaRepository<BookListing, Long> {
 
     @Query(value = "SELECT * FROM bookinfo as b WHERE b.price >= :price", nativeQuery = true)
     List<BookListing> findBooksCostlierThanThePrice(@Param("price") Double price);
+
+
+
+
+    // Search by book name OR author name
+    @Query("SELECT b FROM BookListing b " +
+            "WHERE LOWER(b.bookName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "   OR LOWER(b.authorName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<BookListing> searchBooks(@Param("keyword") String keyword);
+
+    // For suggestions (only book names & author names)
+    @Query("SELECT DISTINCT b.bookName FROM BookListing b WHERE LOWER(b.bookName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<String> suggestBookNames(@Param("keyword") String keyword);
+
+    @Query("SELECT DISTINCT b.authorName FROM BookListing b WHERE LOWER(b.authorName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<String> suggestAuthorNames(@Param("keyword") String keyword);
 }
 
 
