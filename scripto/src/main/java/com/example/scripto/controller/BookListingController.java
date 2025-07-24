@@ -4,6 +4,7 @@ import com.example.scripto.dto.BookDto;
 import com.example.scripto.dto.EditBookDto;
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.implementation.BookListingImpl;
+import com.example.scripto.response.admin.book.BookResponse;
 import com.example.scripto.service.IBookListing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/book")
+@RequestMapping("/book-seller")
 public class BookListingController {
 
     @Autowired

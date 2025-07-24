@@ -56,9 +56,7 @@ public class SpringSecurity {
         return http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(allWhitelist).permitAll()
-//                        .requestMatchers("/login/**").authenticated()
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/book-seller/**", "/seller-view/**").hasRole("SELLER")
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())

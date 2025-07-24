@@ -1,5 +1,6 @@
 package com.example.scripto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,9 +47,9 @@ public class BookListing implements Serializable {
     private String imageUrl;
 
 
-    //Link to the seller (User)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "bookListings"})
     private User seller;
 
 

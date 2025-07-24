@@ -14,37 +14,33 @@ public interface BookListingRepo extends JpaRepository<BookListing, Long> {
     BookListing findByBookNameAndAuthorName(String bookName, String authorName);
 
 
-    @Query(value = "SELECT " +
-            "  MIN(book_id) AS book_id, " +
-            "  book_name, " +
-            "  author_name, " +
-            "  MAX(price) AS price, " +
-            "  MAX(total_quantity) AS total_quantity, " +
-            "  MAX(sold_quantity) AS sold_quantity, " +
-            "  MAX(book_details) AS book_details, " +
-            "  MAX(image_url) AS image_url, " +
-            "  MAX(created_date_and_time) AS created_date_and_time, " +
-            "  MAX(updated_date_and_time) AS updated_date_and_time " +
-            "FROM bookinfo " +
-            "GROUP BY book_name, author_name; ", nativeQuery = true)
-    List<BookListing> findAllUniqueBook();
+    @Query("SELECT b FROM BookListing b WHERE b.seller.email = :email")
+    List<BookListing> findAllBooksBySellerEmail(@Param("email") String email); //use JPQL
 
 
-    @Query(value = "SELECT * FROM bookinfo WHERE book_name = :bookName", nativeQuery = true)
-    List<BookListing> findBookByBookName(@Param("bookName") String bookName);
+
+    @Query("SELECT b FROM BookListing as b WHERE b.bookName = :bookName AND b.seller.email = :email")
+    List<BookListing> findBookByBookName(@Param("email") String email,
+                                         @Param("bookName") String bookName); //use JPQL
 
 
-    @Query(value = "SELECT * FROM bookinfo b WHERE LOWER(b.author_name) LIKE LOWER(CONCAT('%', :authorName, '%'))", nativeQuery = true)
-    List<BookListing> findBookByAuthorName(@Param("authorName") String authorName);
+    @Query("SELECT b FROM BookListing b WHERE b.seller.email = :email AND LOWER(b.authorName) LIKE LOWER(CONCAT('%', :authorName, '%'))")
+    List<BookListing> findBookByAuthorName(@Param("email") String email,
+                                           @Param("authorName") String authorName);//use JPQL
 
 
-    @Query(value = "SELECT * FROM bookinfo as b WHERE b.price <= :price", nativeQuery = true)
-    List<BookListing> findBooksCheaperThanThePrice(@Param("price") Double price);
+    @Query(value = "SELECT b FROM BookListing b WHERE b.seller.email = :email AND b.price <= :price")
+    List<BookListing> findBooksCheaperThanThePrice(@Param("email") String email,
+                                                   @Param("price") Double price);
 
 
-    List<BookListing> findByPriceBetween(Double min, Double max);
+    @Query("SELECT b FROM BookListing b WHERE b.seller.email = :email AND b.price BETWEEN :min AND :max")
+    List<BookListing> findBySellerEmailAndPriceBetween(@Param("email") String email,
+                                                       @Param("min") Double min,
+                                                       @Param("max") Double max);
 
 
+<<<<<<< HEAD
     @Query(value = "SELECT * FROM bookinfo as b WHERE b.price >= :price", nativeQuery = true)
     List<BookListing> findBooksCostlierThanThePrice(@Param("price") Double price);
 
@@ -63,6 +59,11 @@ public interface BookListingRepo extends JpaRepository<BookListing, Long> {
 
     @Query("SELECT DISTINCT b.authorName FROM BookListing b WHERE LOWER(b.authorName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<String> suggestAuthorNames(@Param("keyword") String keyword);
+=======
+
+    @Query(value = "SELECT b FROM BookListing b WHERE b.seller.email = :email AND b.price >= :price")
+    List<BookListing> findBooksCostlierThanThePrice(@Param("email") String email, @Param("price") Double price);
+>>>>>>> 3be604eddbb4c9c7fb5887be845266a6aca0db95
 }
 
 
