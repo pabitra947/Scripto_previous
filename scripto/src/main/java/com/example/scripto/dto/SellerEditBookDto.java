@@ -3,7 +3,7 @@ package com.example.scripto.dto;
 import lombok.Data;
 
 @Data
-public class EditBookDto {
+public class SellerEditBookDto {
     private Integer totalQuantity;
     private Double price;
 }

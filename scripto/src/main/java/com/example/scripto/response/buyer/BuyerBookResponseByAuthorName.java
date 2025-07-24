@@ -1,22 +1,16 @@
-package com.example.scripto.response.admin.book;
+package com.example.scripto.response.buyer;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookResponseByAuthorName {
-    private Long bookId;
+public class BuyerBookResponseByAuthorName {
     private String bookName;
     private Double price;
-    private int totalQuantity;
-    private int soldQuantity;
     private int availableQuantity;
     private String bookDetails;
     private String imageUrl;
-    private LocalDateTime createdDateAndTime;
 }

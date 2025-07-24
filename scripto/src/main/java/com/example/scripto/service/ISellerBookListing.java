@@ -3,33 +3,33 @@ package com.example.scripto.service;
 
 import com.example.scripto.dto.*;
 import com.example.scripto.entity.BookListing;
-import com.example.scripto.response.admin.book.BookResponseByAuthorName;
-import com.example.scripto.response.admin.book.BookResponseByBookName;
-import com.example.scripto.response.admin.book.BookResponse;
-import com.example.scripto.response.admin.book.BookResponseOnPrice;
+import com.example.scripto.response.seller.book.SellerBookResponseByAuthorName;
+import com.example.scripto.response.seller.book.SellerBookResponseByBookName;
+import com.example.scripto.response.seller.book.SellerBookResponse;
+import com.example.scripto.response.seller.book.SellerBookResponseOnPrice;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface IBookListing {
+public interface ISellerBookListing {
 
-    ResponseEntity<BookListing> addNewBook(BookDto information);
+    ResponseEntity<BookListing> addNewBook(SellerBookDto information);
 
-    ResponseEntity<BookListing> updateBookDetails(Long bookId, EditBookDto updateDto);
+    ResponseEntity<BookListing> updateBookDetails(Long bookId, SellerEditBookDto updateDto);
 
     ResponseEntity<?> deleteBookById(long id);
 
-    ResponseEntity<List<BookResponse>> findAllUniqueBook();
+    ResponseEntity<List<SellerBookResponse>> findAllUniqueBook();
 
-    ResponseEntity<List<BookResponseByBookName>> findBookByBookName(String book);
+    ResponseEntity<List<SellerBookResponseByBookName>> findBookByBookName(String book);
 
-    ResponseEntity<List<BookResponseByAuthorName>> findBookByAuthorName(String author);
+    ResponseEntity<List<SellerBookResponseByAuthorName>> findBookByAuthorName(String author);
 
-    ResponseEntity<List<BookResponseOnPrice>> findBookByCheaperThanThePrice(Double price);
+    ResponseEntity<List<SellerBookResponseOnPrice>> findBookByCheaperThanThePrice(Double price);
 
-    ResponseEntity<List<BookResponseOnPrice>> findBookByPriceRange(Double min, Double max);
+    ResponseEntity<List<SellerBookResponseOnPrice>> findBookByPriceRange(Double min, Double max);
 
-    ResponseEntity<List<BookResponseOnPrice>> findBookByHigherThenThePrice(Double price);
+    ResponseEntity<List<SellerBookResponseOnPrice>> findBookByHigherThenThePrice(Double price);
 }
 
 

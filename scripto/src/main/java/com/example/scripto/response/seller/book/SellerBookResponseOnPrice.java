@@ -1,4 +1,4 @@
-package com.example.scripto.response.admin.book;
+package com.example.scripto.response.seller.book;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BookResponseOnPrice {
+public class SellerBookResponseOnPrice {
     private Long bookId;
     private String bookName;
     private String authorName;

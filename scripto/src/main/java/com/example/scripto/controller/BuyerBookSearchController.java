@@ -1,7 +1,9 @@
 package com.example.scripto.controller;
 
-import com.example.scripto.entity.BookListing;
-import com.example.scripto.implementation.BuyerBookBuyerSearchServiceImpl;
+import com.example.scripto.implementation.BuyerBookSearchServiceImpl;
+import com.example.scripto.response.buyer.BuyerBookResponse;
+import com.example.scripto.response.buyer.BuyerBookResponseByAuthorName;
+import com.example.scripto.response.buyer.BuyerBookResponseByBookName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,11 +18,12 @@ import java.util.List;
 public class BuyerBookSearchController {
 
     @Autowired
-    private BuyerBookBuyerSearchServiceImpl bookSearchService;
+    private BuyerBookSearchServiceImpl bookSearchService;
+
 
     // Search books by name OR author
     @GetMapping("/search")
-    public ResponseEntity<List<BookListing>> searchBooks(@RequestParam String keyword) {
+    public ResponseEntity<List<BuyerBookResponse>> searchBooks(@RequestParam String keyword) {
         return bookSearchService.searchBooks(keyword);
     }
 
@@ -28,15 +31,15 @@ public class BuyerBookSearchController {
 
     // Suggest book names
     @GetMapping("/suggest/book-names")
-    public ResponseEntity<List<String>> suggestBookNames(@RequestParam String keyword) {
-        return bookSearchService.getBookNameSuggestions(keyword);
+    public ResponseEntity<List<BuyerBookResponse>> getBookByBookNames(@RequestParam String bookName) {
+        return bookSearchService.getBookByBookName(bookName);
     }
 
 
 
     // Suggest author names
-    @GetMapping("/suggest/authors")
-    public ResponseEntity<List<String>> suggestAuthorNames(@RequestParam String keyword) {
-        return bookSearchService.getAuthorSuggestions(keyword);
+    @GetMapping("/suggest/author-name")
+    public ResponseEntity<List<BuyerBookResponse>> getBookByAuthorNames(@RequestParam String authorName) {
+        return bookSearchService.getBookByAuthorName(authorName);
     }
 }

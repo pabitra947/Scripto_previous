@@ -4,13 +4,13 @@ import com.example.scripto.dto.*;
 
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.entity.User;
-import com.example.scripto.repository.BookListingRepo;
+import com.example.scripto.repository.SellerBookListingRepo;
 import com.example.scripto.repository.UserRepository;
-import com.example.scripto.response.admin.book.BookResponseByAuthorName;
-import com.example.scripto.response.admin.book.BookResponseByBookName;
-import com.example.scripto.response.admin.book.BookResponse;
-import com.example.scripto.response.admin.book.BookResponseOnPrice;
-import com.example.scripto.service.IBookListing;
+import com.example.scripto.response.seller.book.SellerBookResponseByAuthorName;
+import com.example.scripto.response.seller.book.SellerBookResponseByBookName;
+import com.example.scripto.response.seller.book.SellerBookResponse;
+import com.example.scripto.response.seller.book.SellerBookResponseOnPrice;
+import com.example.scripto.service.ISellerBookListing;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +22,19 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class BookListingImpl implements IBookListing {
+public class SellerSellerBookListingImpl implements ISellerBookListing {
 //    private BookListing bookinformation = new BookListing();
     private ModelMapper modelMapper = new ModelMapper();
 
 
     @Autowired
-    private BookListingRepo bookListingRepo;
+    private SellerBookListingRepo sellerBookListingRepo;
 
     @Autowired
     private UserRepository userRepository;
@@ -41,9 +42,9 @@ public class BookListingImpl implements IBookListing {
 
     //add new Book
     @Override
-    public ResponseEntity<BookListing> addNewBook(BookDto information) {
+    public ResponseEntity<BookListing> addNewBook(SellerBookDto information) {
         try {
-            BookListing existingBook = bookListingRepo.findByBookNameAndAuthorName(
+            BookListing existingBook = sellerBookListingRepo.findByBookNameAndAuthorName(
                     information.getBookName(), information.getAuthorName());
 
             if (existingBook != null) {
@@ -66,7 +67,7 @@ public class BookListingImpl implements IBookListing {
             BookListing book = modelMapper.map(information, BookListing.class);
             book.setSoldQuantity(0);
             book.setSeller(seller);
-            BookListing saved = bookListingRepo.save(book);
+            BookListing saved = sellerBookListingRepo.save(book);
 
             return new ResponseEntity<>(saved, HttpStatus.CREATED);
 
@@ -81,14 +82,14 @@ public class BookListingImpl implements IBookListing {
 
     //Used to update the book price and the quantity
     @Override
-    public ResponseEntity<BookListing> updateBookDetails(Long bookId, EditBookDto updateDto) {
+    public ResponseEntity<BookListing> updateBookDetails(Long bookId, SellerEditBookDto updateDto) {
         try {
             // Step 1: Get the authenticated user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
 
             // Step 2: Fetch the book by ID
-            Optional<BookListing> optionalBook = bookListingRepo.findById(bookId);
+            Optional<BookListing> optionalBook = sellerBookListingRepo.findById(bookId);
             if (optionalBook.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -111,7 +112,7 @@ public class BookListingImpl implements IBookListing {
 
             book.setUpdatedDateAndTime(LocalDateTime.now());
 
-            BookListing updated = bookListingRepo.save(book);
+            BookListing updated = sellerBookListingRepo.save(book);
             return new ResponseEntity<>(updated, HttpStatus.OK);
 
         } catch (Exception e) {
@@ -132,7 +133,7 @@ public class BookListingImpl implements IBookListing {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName();
 
-            Optional<BookListing> book = bookListingRepo.findById(id);
+            Optional<BookListing> book = sellerBookListingRepo.findById(id);
             if (book.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
@@ -140,7 +141,7 @@ public class BookListingImpl implements IBookListing {
             BookListing bookListing = book.get();
 
             if(bookListing.getSeller().getEmail().equals(loggedInEmail)){
-                bookListingRepo.deleteById(id);
+                sellerBookListingRepo.deleteById(id);
                 return new ResponseEntity<>("The book is deleted", HttpStatus.OK);
             }
             else{
@@ -156,18 +157,18 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find all the unique book
     @Override
-    public ResponseEntity<List<BookResponse>> findAllUniqueBook(){
+    public ResponseEntity<List<SellerBookResponse>> findAllUniqueBook(){
         try {
             // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
             //Fetch only books listed by this user (seller)
-            List<BookListing> books = bookListingRepo.findAllBooksBySellerEmail(loggedInEmail);
+            List<BookListing> books = sellerBookListingRepo.findAllBooksBySellerEmail(loggedInEmail);
 
             //Map entities to response DTOs
-            List<BookResponse> response = books.stream().map(
-                    book -> new BookResponse(
+            List<SellerBookResponse> response = books.stream().map(
+                    book -> new SellerBookResponse(
                             book.getBookId(),
                             book.getBookName(),
                             book.getAuthorName(),
@@ -194,17 +195,17 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find the book based on the book name
     @Override
-    public ResponseEntity<List<BookResponseByBookName>> findBookByBookName(String book){
+    public ResponseEntity<List<SellerBookResponseByBookName>> findBookByBookName(String book){
         try {
             // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
-            List<BookListing> allBookByBookName = bookListingRepo.findBookByBookName(loggedInEmail, book);
+            List<BookListing> allBookByBookName = sellerBookListingRepo.findBookByBookName(loggedInEmail, book);
 
             if(allBookByBookName != null){
-                List<BookResponseByBookName> books = allBookByBookName.stream().map(
-                        booked -> new BookResponseByBookName(
+                List<SellerBookResponseByBookName> books = allBookByBookName.stream().map(
+                        booked -> new SellerBookResponseByBookName(
                                 booked.getBookId(),
                                 booked.getAuthorName(),
                                 booked.getPrice(),
@@ -220,7 +221,7 @@ public class BookListingImpl implements IBookListing {
                 return new ResponseEntity<>(books, HttpStatus.OK);
             }
             else {
-                throw new RuntimeException("This name book is not present");
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
 
         } catch (Exception e){
@@ -233,17 +234,17 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find the book based on the Author name
     @Override
-    public ResponseEntity<List<BookResponseByAuthorName>> findBookByAuthorName(String author){
+    public ResponseEntity<List<SellerBookResponseByAuthorName>> findBookByAuthorName(String author){
         try {
             // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
-            List<BookListing> allBookByAuthorName = bookListingRepo.findBookByAuthorName(loggedInEmail, author);
+            List<BookListing> allBookByAuthorName = sellerBookListingRepo.findBookByAuthorName(loggedInEmail, author);
 
             if(allBookByAuthorName != null){
-                List<BookResponseByAuthorName> books = allBookByAuthorName.stream().map(
-                        book -> new BookResponseByAuthorName(
+                List<SellerBookResponseByAuthorName> books = allBookByAuthorName.stream().map(
+                        book -> new SellerBookResponseByAuthorName(
                                 book.getBookId(),
                                 book.getBookName(),
                                 book.getPrice(),
@@ -259,7 +260,7 @@ public class BookListingImpl implements IBookListing {
                 return new ResponseEntity<>(books, HttpStatus.OK);
             }
             else{
-                throw new RuntimeException("This author named book is not present.");
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -271,17 +272,17 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find the book on a particular price point
     @Override
-    public ResponseEntity<List<BookResponseOnPrice>> findBookByCheaperThanThePrice(Double price){
+    public ResponseEntity<List<SellerBookResponseOnPrice>> findBookByCheaperThanThePrice(Double price){
         try {
             // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
-            List<BookListing> allBookByPrice = bookListingRepo.findBooksCheaperThanThePrice(loggedInEmail, price);
+            List<BookListing> allBookByPrice = sellerBookListingRepo.findBooksCheaperThanThePrice(loggedInEmail, price);
 
             if (!allBookByPrice.isEmpty()) {
-                List<BookResponseOnPrice> books = allBookByPrice.stream().map(
-                        book -> new BookResponseOnPrice(
+                List<SellerBookResponseOnPrice> books = allBookByPrice.stream().map(
+                        book -> new SellerBookResponseOnPrice(
                                 book.getBookId(),
                                 book.getBookName(),
                                 book.getAuthorName(),
@@ -297,7 +298,7 @@ public class BookListingImpl implements IBookListing {
                 return new ResponseEntity<>(books, HttpStatus.OK);
             }
             else {
-                throw new RuntimeException("Below this price point no book is available.");
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -309,17 +310,17 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find the book on a particular price range 
     @Override
-    public ResponseEntity<List<BookResponseOnPrice>> findBookByPriceRange(Double min, Double max){
+    public ResponseEntity<List<SellerBookResponseOnPrice>> findBookByPriceRange(Double min, Double max){
         try {
             // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
-            List<BookListing> allBookByPriceRange = bookListingRepo.findBySellerEmailAndPriceBetween(loggedInEmail, min, max);
+            List<BookListing> allBookByPriceRange = sellerBookListingRepo.findBySellerEmailAndPriceBetween(loggedInEmail, min, max);
 
             if (!allBookByPriceRange.isEmpty()) {
-                List<BookResponseOnPrice> books = allBookByPriceRange.stream().map(
-                        book -> new BookResponseOnPrice(
+                List<SellerBookResponseOnPrice> books = allBookByPriceRange.stream().map(
+                        book -> new SellerBookResponseOnPrice(
                                 book.getBookId(),
                                 book.getBookName(),
                                 book.getAuthorName(),
@@ -335,7 +336,7 @@ public class BookListingImpl implements IBookListing {
                 return new ResponseEntity<>(books, HttpStatus.OK);
             }
             else {
-                throw new RuntimeException("between this price point no book is available.");
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
         } catch (Exception e){
             e.printStackTrace();
@@ -347,17 +348,17 @@ public class BookListingImpl implements IBookListing {
 
     //Used to find the book Higher then the given price
     @Override
-    public ResponseEntity<List<BookResponseOnPrice>> findBookByHigherThenThePrice(Double price){
+    public ResponseEntity<List<SellerBookResponseOnPrice>> findBookByHigherThenThePrice(Double price){
         try {
             // Get logged-in user's email
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
-            List<BookListing> allBookByPrice = bookListingRepo.findBooksCostlierThanThePrice(loggedInEmail, price);
+            List<BookListing> allBookByPrice = sellerBookListingRepo.findBooksCostlierThanThePrice(loggedInEmail, price);
 
             if (!allBookByPrice.isEmpty()) {
-                List<BookResponseOnPrice> books = allBookByPrice.stream().map(
-                        book -> new BookResponseOnPrice(
+                List<SellerBookResponseOnPrice> books = allBookByPrice.stream().map(
+                        book -> new SellerBookResponseOnPrice(
                                 book.getBookId(),
                                 book.getBookName(),
                                 book.getAuthorName(),
@@ -373,7 +374,7 @@ public class BookListingImpl implements IBookListing {
                 return new ResponseEntity<>(books, HttpStatus.OK);
             }
             else {
-                throw new RuntimeException("above this price point no book is available.");
+                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
         } catch (Exception e){
             e.printStackTrace();

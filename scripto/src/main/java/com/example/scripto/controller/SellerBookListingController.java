@@ -1,37 +1,33 @@
 package com.example.scripto.controller;
 
-import com.example.scripto.dto.BookDto;
-import com.example.scripto.dto.EditBookDto;
+import com.example.scripto.dto.SellerBookDto;
+import com.example.scripto.dto.SellerEditBookDto;
 import com.example.scripto.entity.BookListing;
-import com.example.scripto.implementation.BookListingImpl;
-import com.example.scripto.response.admin.book.BookResponse;
-import com.example.scripto.service.IBookListing;
+import com.example.scripto.implementation.SellerSellerBookListingImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/book-seller")
-public class BookListingController {
+public class SellerBookListingController {
 
     @Autowired
-    private BookListingImpl bookListing;
+    private SellerSellerBookListingImpl bookListing;
 
 
 
     //add new book to the DB
     @PostMapping("/add-book")
-    public ResponseEntity<BookListing> addNewBook(@RequestBody BookDto book){
+    public ResponseEntity<BookListing> addNewBook(@RequestBody SellerBookDto book){
         return bookListing.addNewBook(book);
     }
 
 
     //Update book price based on the book id
     @PutMapping("/update-book-price&quantity/{id}")
-    public ResponseEntity<?> updateBookPriceById(@PathVariable long id, @RequestBody EditBookDto editBookDto){
-        return bookListing.updateBookDetails(id, editBookDto);
+    public ResponseEntity<?> updateBookPriceById(@PathVariable long id, @RequestBody SellerEditBookDto sellerEditBookDto){
+        return bookListing.updateBookDetails(id, sellerEditBookDto);
     }
 
 
