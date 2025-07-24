@@ -1,5 +1,6 @@
 package com.example.scripto.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -41,6 +42,7 @@ public class User {
 
     //One seller can add many books
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<BookListing> booksAdded;
 
 }

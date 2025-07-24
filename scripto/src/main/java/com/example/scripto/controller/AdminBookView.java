@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin-view")
+@RequestMapping("/seller-view")
 public class AdminBookView {
 
     @Autowired
@@ -20,14 +20,14 @@ public class AdminBookView {
 
 
 
-    //Used to get all the unique book
+    //Used to get all the unique book(s)
     @GetMapping("/all-unique-book")
     public ResponseEntity<List<BookResponse>> findAllUniqueBook(){
         return bookListing.findAllUniqueBook();
     }
 
 
-    //Used to get all the book based on the book name
+    //Used to get all the book based on the book name(s)
     @GetMapping("/book-by-name")
     public ResponseEntity<List<BookResponseByBookName>> findBookByBookName(@RequestParam String book){
         return bookListing.findBookByBookName(book);

@@ -3,7 +3,9 @@ package com.example.scripto.implementation;
 import com.example.scripto.dto.*;
 
 import com.example.scripto.entity.BookListing;
+import com.example.scripto.entity.User;
 import com.example.scripto.repository.BookListingRepo;
+import com.example.scripto.repository.UserRepository;
 import com.example.scripto.response.admin.book.BookResponseByAuthorName;
 import com.example.scripto.response.admin.book.BookResponseByBookName;
 import com.example.scripto.response.admin.book.BookResponse;
@@ -14,6 +16,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,31 +28,49 @@ import java.util.stream.Collectors;
 
 @Service
 public class BookListingImpl implements IBookListing {
-    private BookListing bookinformation = new BookListing();
+//    private BookListing bookinformation = new BookListing();
     private ModelMapper modelMapper = new ModelMapper();
 
 
     @Autowired
     private BookListingRepo bookListingRepo;
 
+    @Autowired
+    private UserRepository userRepository;
+
 
     //add new Book
     @Override
-    public ResponseEntity<BookListing> addNewBook(BookDto information){
+    public ResponseEntity<BookListing> addNewBook(BookDto information) {
         try {
-            BookListing book=bookListingRepo.findByBookNameAndAuthorName(information.getBookName(), information.getAuthorName());
+            BookListing existingBook = bookListingRepo.findByBookNameAndAuthorName(
+                    information.getBookName(), information.getAuthorName());
 
-            if(book == null)
-            {
-                bookinformation = modelMapper.map(information, BookListing.class);
-                bookinformation.setSoldQuantity(0);
-                BookListing newBook = bookListingRepo.save(bookinformation);
-                return new ResponseEntity<>(newBook, HttpStatus.CREATED);
+            if (existingBook != null) {
+                throw new RuntimeException("Book is already present.");
             }
-            else{
-                throw new RuntimeException("Book is already present..");
+
+            //Get logged-in user's email/username
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+
+            //Fetch user from DB
+            User seller = userRepository.findByEmail(email);
+
+            if(seller == null){
+                throw new RuntimeException("user not found..");
             }
-        } catch (Exception e){
+
+
+            //Map & set seller
+            BookListing book = modelMapper.map(information, BookListing.class);
+            book.setSoldQuantity(0);
+            book.setSeller(seller);
+            BookListing saved = bookListingRepo.save(book);
+
+            return new ResponseEntity<>(saved, HttpStatus.CREATED);
+
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -56,20 +78,29 @@ public class BookListingImpl implements IBookListing {
 
 
 
+
     //Used to update the book price and the quantity
     @Override
     public ResponseEntity<BookListing> updateBookDetails(Long bookId, EditBookDto updateDto) {
         try {
-            //Find the book using id from the DB
-            Optional<BookListing> optionalBook = bookListingRepo.findById(bookId);
+            // Step 1: Get the authenticated user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName();
 
-            //check from book existence
+            // Step 2: Fetch the book by ID
+            Optional<BookListing> optionalBook = bookListingRepo.findById(bookId);
             if (optionalBook.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
             BookListing book = optionalBook.get();
 
+            // Step 3: Check if the logged-in user is the book's seller
+            if (!book.getSeller().getEmail().equals(loggedInEmail)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN); // Not authorized
+            }
+
+            // Step 4: Update price and quantity if provided
             if (updateDto.getPrice() != null) {
                 book.setPrice(updateDto.getPrice());
             }
@@ -82,11 +113,13 @@ public class BookListingImpl implements IBookListing {
 
             BookListing updated = bookListingRepo.save(book);
             return new ResponseEntity<>(updated, HttpStatus.OK);
-        } catch (Exception e){
+
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
 
 
 
@@ -95,8 +128,18 @@ public class BookListingImpl implements IBookListing {
     @Transactional
     public ResponseEntity<?> deleteBookById(long id){
         try {
+            // Step 1: Get the authenticated user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName();
+
             Optional<BookListing> book = bookListingRepo.findById(id);
-            if(book.isPresent()){
+            if (book.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+
+            BookListing bookListing = book.get();
+
+            if(bookListing.getSeller().getEmail().equals(loggedInEmail)){
                 bookListingRepo.deleteById(id);
                 return new ResponseEntity<>("The book is deleted", HttpStatus.OK);
             }
@@ -105,7 +148,7 @@ public class BookListingImpl implements IBookListing {
             }
         } catch (Exception e){
             e.printStackTrace();
-            return new ResponseEntity<>("Somethins went wrong", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Somethins went wrong", HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -115,8 +158,14 @@ public class BookListingImpl implements IBookListing {
     @Override
     public ResponseEntity<List<BookResponse>> findAllUniqueBook(){
         try {
-            List<BookListing> books = bookListingRepo.findAllUniqueBook();
+            // Get logged-in user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName(); // Assuming email is used as username
 
+            //Fetch only books listed by this user (seller)
+            List<BookListing> books = bookListingRepo.findAllBooksBySellerEmail(loggedInEmail);
+
+            //Map entities to response DTOs
             List<BookResponse> response = books.stream().map(
                     book -> new BookResponse(
                             book.getBookId(),
@@ -125,7 +174,7 @@ public class BookListingImpl implements IBookListing {
                             book.getPrice(),
                             book.getTotalQuantity(),
                             book.getSoldQuantity(),
-                            book.getAvailableQuantity(),  // custom calculated field from getter
+                            book.getAvailableQuantity(),
                             book.getBookDetails(),
                             book.getImageUrl(),
                             book.getCreatedDateAndTime()
@@ -134,7 +183,7 @@ public class BookListingImpl implements IBookListing {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
 
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
         }
@@ -142,11 +191,16 @@ public class BookListingImpl implements IBookListing {
 
 
 
+
     //Used to find the book based on the book name
     @Override
     public ResponseEntity<List<BookResponseByBookName>> findBookByBookName(String book){
         try {
-            List<BookListing> allBookByBookName = bookListingRepo.findBookByBookName(book);
+            // Get logged-in user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName(); // Assuming email is used as username
+
+            List<BookListing> allBookByBookName = bookListingRepo.findBookByBookName(loggedInEmail, book);
 
             if(allBookByBookName != null){
                 List<BookResponseByBookName> books = allBookByBookName.stream().map(
@@ -181,7 +235,11 @@ public class BookListingImpl implements IBookListing {
     @Override
     public ResponseEntity<List<BookResponseByAuthorName>> findBookByAuthorName(String author){
         try {
-            List<BookListing> allBookByAuthorName = bookListingRepo.findBookByAuthorName(author);
+            // Get logged-in user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName(); // Assuming email is used as username
+
+            List<BookListing> allBookByAuthorName = bookListingRepo.findBookByAuthorName(loggedInEmail, author);
 
             if(allBookByAuthorName != null){
                 List<BookResponseByAuthorName> books = allBookByAuthorName.stream().map(
@@ -215,7 +273,11 @@ public class BookListingImpl implements IBookListing {
     @Override
     public ResponseEntity<List<BookResponseOnPrice>> findBookByCheaperThanThePrice(Double price){
         try {
-            List<BookListing> allBookByPrice = bookListingRepo.findBooksCheaperThanThePrice(price);
+            // Get logged-in user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName(); // Assuming email is used as username
+
+            List<BookListing> allBookByPrice = bookListingRepo.findBooksCheaperThanThePrice(loggedInEmail, price);
 
             if (!allBookByPrice.isEmpty()) {
                 List<BookResponseOnPrice> books = allBookByPrice.stream().map(
@@ -249,7 +311,11 @@ public class BookListingImpl implements IBookListing {
     @Override
     public ResponseEntity<List<BookResponseOnPrice>> findBookByPriceRange(Double min, Double max){
         try {
-            List<BookListing> allBookByPriceRange = bookListingRepo.findByPriceBetween(min, max);
+            // Get logged-in user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName(); // Assuming email is used as username
+
+            List<BookListing> allBookByPriceRange = bookListingRepo.findBySellerEmailAndPriceBetween(loggedInEmail, min, max);
 
             if (!allBookByPriceRange.isEmpty()) {
                 List<BookResponseOnPrice> books = allBookByPriceRange.stream().map(
@@ -283,7 +349,11 @@ public class BookListingImpl implements IBookListing {
     @Override
     public ResponseEntity<List<BookResponseOnPrice>> findBookByHigherThenThePrice(Double price){
         try {
-            List<BookListing> allBookByPrice = bookListingRepo.findBooksCostlierThanThePrice(price);
+            // Get logged-in user's email
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInEmail = authentication.getName(); // Assuming email is used as username
+
+            List<BookListing> allBookByPrice = bookListingRepo.findBooksCostlierThanThePrice(loggedInEmail, price);
 
             if (!allBookByPrice.isEmpty()) {
                 List<BookResponseOnPrice> books = allBookByPrice.stream().map(
