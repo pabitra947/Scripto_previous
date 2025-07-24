@@ -18,12 +18,12 @@ public class Wishlist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long wishlistId;
 
-    // ✅ Who added the book to wishlist
+    //Who added the book to wishlist
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // ✅ Which book is in wishlist
+    //Which book is in wishlist
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private BookListing book;
