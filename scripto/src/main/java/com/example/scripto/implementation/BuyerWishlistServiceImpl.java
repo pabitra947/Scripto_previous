@@ -84,16 +84,7 @@ public class BuyerWishlistServiceImpl implements IBuyerWishList {
 
             List<Wishlist> wishlist = wishlistRepo.findByUser(user);
 
-            List<BuyerBookResponse> books = wishlist.stream().map(Wishlist::getBook).map( book ->
-                    new BuyerBookResponse(
-                            book.getBookName(),
-                            book.getAuthorName(),
-                            book.getPrice(),
-                            book.getAvailableQuantity(),
-                            book.getBookDetails(),
-                            book.getImageUrl()
-                    )
-            ).toList();
+            List<BuyerBookResponse> books = wishlist.stream().map(Wishlist::getBook).map(BuyerBookResponse::new).toList();
 
             return new ResponseEntity<>(books, HttpStatus.OK);
         } catch (Exception e) {

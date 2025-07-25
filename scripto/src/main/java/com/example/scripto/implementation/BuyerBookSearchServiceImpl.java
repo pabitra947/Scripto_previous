@@ -3,8 +3,6 @@ package com.example.scripto.implementation;
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.repository.BuyerBookListingRepo;
 import com.example.scripto.response.buyer.BuyerBookResponse;
-import com.example.scripto.response.buyer.BuyerBookResponseByAuthorName;
-import com.example.scripto.response.buyer.BuyerBookResponseByBookName;
 import com.example.scripto.service.IBuyerBooksSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +21,53 @@ public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
 
 
 
+
+    //All feature is done in one here
+    @Override
+    public ResponseEntity<List<BuyerBookResponse>> searchBooks(
+            String bookName, String authorName, Double minPrice, Double maxPrice) {
+        try {
+            // Normalize input
+            String normalizedBook = (bookName != null && !bookName.isBlank()) ? bookName : null;
+            String normalizedAuthor = (authorName != null && !authorName.isBlank()) ? authorName : null;
+
+            List<BookListing> listings = buyerBookListingRepo.searchByBookAndAuthorAndPrice(
+                    normalizedBook, normalizedAuthor, minPrice, maxPrice
+            );
+
+            List<BuyerBookResponse> response = listings.stream()
+                    .map(BuyerBookResponse::new)
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+*
+
     // for getting the all search book
     @Override
     public ResponseEntity<List<BuyerBookResponse>> searchBooks(String keyword) {
@@ -34,16 +78,7 @@ public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
                 return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
 
-            List<BuyerBookResponse> response = availableBooks.stream().map(book ->
-                    new BuyerBookResponse(
-                            book.getBookName(),
-                            book.getAuthorName(),
-                            book.getPrice(),
-                            book.getAvailableQuantity(),
-                            book.getBookDetails(),
-                            book.getImageUrl()
-                    )
-            ).collect(Collectors.toList());
+            List<BuyerBookResponse> response = availableBooks.stream().map(BuyerBookResponse::new).collect(Collectors.toList());
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
@@ -66,16 +101,7 @@ public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
                return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
            }
 
-           List<BuyerBookResponse> response = availableBooks.stream().map(book ->
-                   new BuyerBookResponse(
-                           book.getBookName(),
-                           book.getAuthorName(),
-                           book.getPrice(),
-                           book.getAvailableQuantity(),
-                           book.getBookDetails(),
-                           book.getImageUrl()
-                   )
-           ).collect(Collectors.toList());
+           List<BuyerBookResponse> response = availableBooks.stream().map(BuyerBookResponse::new).collect(Collectors.toList());
            return new ResponseEntity<>(response,HttpStatus.OK);
        }catch (Exception e){
            e.printStackTrace();
@@ -97,16 +123,7 @@ public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
                 return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
             }
 
-            List<BuyerBookResponse> response = availableBooks.stream().map(book ->
-                    new BuyerBookResponse(
-                            book.getBookName(),
-                            book.getBookName(),
-                            book.getPrice(),
-                            book.getAvailableQuantity(),
-                            book.getBookDetails(),
-                            book.getImageUrl()
-                    )
-            ).collect(Collectors.toList());
+            List<BuyerBookResponse> response = availableBooks.stream().map(BuyerBookResponse::new).collect(Collectors.toList());
 
             return new ResponseEntity<>(response,HttpStatus.OK);
         } catch (Exception e){
@@ -114,4 +131,31 @@ public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
             return new ResponseEntity<>(new ArrayList<>(),HttpStatus.BAD_REQUEST);
         }
     }
-}
+
+
+
+
+    //get user by between the price range
+    @Override
+    public ResponseEntity<List<BuyerBookResponse>> findBookByPriceRange(String keyword, Double minPrice, Double maxPrice){
+        try {
+            List<BookListing> searchResults = buyerBookListingRepo.searchBooks(keyword);
+
+            // Filter by price range
+            List<BuyerBookResponse> filtered = searchResults.stream()
+                    .filter(book -> book.getPrice() >= minPrice && book.getPrice() <= maxPrice)
+                    .map(BuyerBookResponse::new) // Convert to response DTO
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(filtered, HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+
+
+* */
