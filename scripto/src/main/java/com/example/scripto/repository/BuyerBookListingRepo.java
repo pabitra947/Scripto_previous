@@ -24,6 +24,8 @@ public interface BuyerBookListingRepo extends JpaRepository<BookListing, Long> {
             @Param("authorName") String authorName,
             @Param("minPrice") Double minPrice,
             @Param("maxPrice") Double maxPrice);
+
+    BookListing findBookById(Long bookId);
 }
 
 
