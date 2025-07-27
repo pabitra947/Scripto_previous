@@ -1,21 +1,13 @@
 package com.example.scripto.dto;
 
-import lombok.AllArgsConstructor;
+
+import jakarta.validation.constraints.Min;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class BuyerCartItemDto {
-    private Long cartItemId;
-
     private Long bookId;
-    private String bookName;
-    private String authorName;
-    private Double price;
-    private int availableQuantity;
-    private String imageUrl;
 
-    private int quantity;
+    @Min(value = 1, message = "Quantity must be at least 1")
+    private int quantity = 1;
 }

@@ -1,16 +1,17 @@
 package com.example.scripto.service;
 
 import com.example.scripto.dto.BuyerCartItemDto;
-import com.example.scripto.response.buyer.BuyerCartResponseDto;
+import com.example.scripto.dto.BuyerUpdateCartItemDto;
+import com.example.scripto.response.buyer.BuyerCartResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface IBuyerCart {
 
-    ResponseEntity<BuyerCartItemDto> addToCart(Long buyerId, Long bookId, int quantity);
+    ResponseEntity<String> addToCart(BuyerCartItemDto request);
 
-    ResponseEntity<BuyerCartResponseDto> getCartItemsWithTotal(Long buyerId);
+    ResponseEntity<BuyerCartResponse> viewCart();
 
-    ResponseEntity<String> updateCartItem(Long buyerId, Long bookId, int quantity);
+    ResponseEntity<String> updateCartItem(BuyerUpdateCartItemDto updateCartItemDto);
 
-    ResponseEntity<String> removeCartItem(Long buyerId, Long bookId);
+    ResponseEntity<String> removeCartItem(Long cartItemId);
 }

@@ -1,21 +1,26 @@
 package com.example.scripto.implementation;
 
 import com.example.scripto.dto.BuyerCartItemDto;
+import com.example.scripto.dto.BuyerUpdateCartItemDto;
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.entity.CartItem;
 import com.example.scripto.entity.User;
 import com.example.scripto.repository.BuyerBookListingRepo;
 import com.example.scripto.repository.BuyerCartRepo;
 import com.example.scripto.repository.UserRepository;
-import com.example.scripto.response.buyer.BuyerCartResponseDto;
+import com.example.scripto.response.buyer.BuyerCartItemResponse;
+import com.example.scripto.response.buyer.BuyerCartResponse;
 import com.example.scripto.service.IBuyerCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BuyerCartServiceImpl implements IBuyerCart {
@@ -29,88 +34,140 @@ public class BuyerCartServiceImpl implements IBuyerCart {
     @Autowired
     private BuyerBookListingRepo buyerBookListingRepo;
 
-    private BuyerCartItemDto convertToDto(CartItem item) {
-        return new BuyerCartItemDto(
-                item.getCartItemId(),
-                item.getBook().getBookId(),
-                item.getBook().getBookName(),
-                item.getBook().getAuthorName(),
-                item.getBook().getPrice(),
-                item.getBook().getAvailableQuantity(),
-                item.getBook().getImageUrl(),
-                item.getQuantity()
-        );
-    }
 
-
-
-
+    //add the book into the cart
     @Override
-    public ResponseEntity<BuyerCartItemDto> addToCart(Long buyerId, Long bookId, int quantity) {
+    public ResponseEntity<String> addToCart(BuyerCartItemDto request) {
         try {
-            User buyer = userRepository.findUserById(buyerId);
-            if (buyer == null) throw new RuntimeException("Buyer not found!");
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String email = authentication.getName();
 
-            BookListing book = buyerBookListingRepo.findBookById(bookId);
-            if (book == null) throw new RuntimeException("Book not found!");
+            User user = userRepository.findByEmail(email);
+//            if (user == null || !user.getRole().equalsIgnoreCase("BUYER")) {
+//                return ResponseEntity.status(403).body("Access denied: Only buyers can add to cart");
+//            }
 
-            CartItem existing = buyerCartRepo.findCartItem(buyerId, bookId);
-            if (existing != null) {
-                existing.setQuantity(existing.getQuantity() + quantity);
-                return new ResponseEntity<>(convertToDto(buyerCartRepo.save(existing)),HttpStatus.OK);
+            Optional<BookListing> optionalBook = buyerBookListingRepo.findById(request.getBookId());
+            if (optionalBook.isEmpty()) {
+                return ResponseEntity.badRequest().body("Book not found");
             }
 
-            CartItem newItem = new CartItem();
-            newItem.setBuyer(buyer);
-            newItem.setBook(book);
-            newItem.setQuantity(quantity);
-            newItem.setAddedAt(LocalDateTime.now());
+            BookListing book = optionalBook.get();
 
-            return new ResponseEntity<>(convertToDto(buyerCartRepo.save(newItem)),HttpStatus.OK);
+            // Default quantity = 1 if input is 0 or negative
+            int quantity = (request.getQuantity() <= 0) ? 1 : request.getQuantity();
+
+            // Check stock availability
+            int available = book.getTotalQuantity() - book.getSoldQuantity();
+            if (quantity > available) {
+                return ResponseEntity.badRequest().body("Requested quantity exceeds available stock.");
+            }
+
+            boolean exists = buyerCartRepo.existsByBuyerAndBook_BookId(user, book.getBookId());
+            if (exists) {
+                return ResponseEntity.badRequest().body("Book already exists in cart.");
+            }
+
+            CartItem cartItem = new CartItem();
+            cartItem.setBook(book);
+            cartItem.setBuyer(user);
+            cartItem.setQuantity(request.getQuantity());
+
+            buyerCartRepo.save(cartItem);
+
+            return new ResponseEntity<>("Book added to cart successfully", HttpStatus.OK);
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Somethings went wrong try block is not working..");
         }
     }
 
 
 
-
+    //Used to view all the book that is present in the cart
     @Override
-    public ResponseEntity<BuyerCartResponseDto> getCartItemsWithTotal(Long buyerId) {
-        try {
-            List<CartItem> items = buyerCartRepo.findAllByBuyerId(buyerId);
+    public ResponseEntity<BuyerCartResponse> viewCart() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
 
-            List<BuyerCartItemDto> dtoList = items.stream()
-                    .map(this::convertToDto)
-                    .toList();
+        User buyer = userRepository.findByEmail(email);
+//        if (buyer == null || !buyer.getRole().equals("BUYER")) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
 
-            double totalPrice = dtoList.stream()
-                    .mapToDouble(item -> item.getPrice() * item.getQuantity())
-                    .sum();
+        List<CartItem> cartItems = buyerCartRepo.findByBuyer(buyer);
 
-            return new ResponseEntity<>(new BuyerCartResponseDto(dtoList, totalPrice),HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        List<BuyerCartItemResponse> availableItems = cartItems.stream()
+                .filter(ci -> ci.getBook().getAvailableQuantity() > 0) //changes
+                .map(ci -> {
+                    BookListing book = ci.getBook();
+                    Double itemTotal = book.getPrice() * ci.getQuantity();
+                    return new BuyerCartItemResponse(
+                            book.getBookId(),
+                            book.getBookName(),
+                            book.getAuthorName(),
+                            book.getBookDetails(),
+                            book.getPrice(),
+                            ci.getQuantity(),
+                            book.getAvailableQuantity(),
+                            itemTotal
+                    );
+                })
+                .toList();
+
+        Double totalAmount = availableItems.stream()
+                .mapToDouble(BuyerCartItemResponse::getTotalPrice)
+                .sum();
+
+        return ResponseEntity.ok(new BuyerCartResponse(availableItems, totalAmount));
     }
 
 
 
 
+    //used to update the book quantity that is already present in the cart
     @Override
-    public ResponseEntity<String> updateCartItem(Long buyerId, Long bookId, int quantity) {
+    public ResponseEntity<String> updateCartItem(BuyerUpdateCartItemDto updateCartItemDto) {
         try {
-            CartItem existing = buyerCartRepo.findCartItem(buyerId, bookId);
-            if (existing == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Item not found in cart!");
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+
+            User buyer = userRepository.findByEmail(email);
+//            if (buyer == null || !buyer.getRole().equals("BUYER")) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+//            }
+
+            Optional<CartItem> optionalCartItem = buyerCartRepo.findById(updateCartItemDto.getCartItemId());
+
+            if (optionalCartItem.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart item not found");
             }
-            existing.setQuantity(quantity);
-            buyerCartRepo.save(existing);
-            return ResponseEntity.ok("Cart updated successfully.");
+
+            CartItem cartItem = optionalCartItem.get();
+
+            // Make sure the item belongs to this buyer
+            if (!cartItem.getBuyer().getEmail().equals(buyer.getEmail())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to update this cart item");
+            }
+
+            BookListing book = cartItem.getBook();
+            int available = book.getAvailableQuantity();
+
+            if (updateCartItemDto.getQuantity() <= 0) {
+                buyerCartRepo.delete(cartItem);
+                return ResponseEntity.ok("Cart item removed");
+            }
+
+            if (updateCartItemDto.getQuantity() > available) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Only " + available + " items available");
+            }
+
+            cartItem.setQuantity(updateCartItemDto.getQuantity());
+            buyerCartRepo.save(cartItem);
+
+            return new ResponseEntity<>("Cart item updated successfully", HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -118,16 +175,33 @@ public class BuyerCartServiceImpl implements IBuyerCart {
         }
     }
 
+
+    //Used to delete the item from the cart
     @Override
-    public ResponseEntity<String> removeCartItem(Long buyerId, Long bookId) {
+    public ResponseEntity<String> removeCartItem(Long cartItemId) {
         try {
-            CartItem existing = buyerCartRepo.findCartItem(buyerId, bookId);
-            if (existing == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body("Item not found in cart!");
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+
+            User buyer = userRepository.findByEmail(email);
+//            if (buyer == null || !buyer.getRole().equals("BUYER")) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+//            }
+
+            Optional<CartItem> optionalCartItem = buyerCartRepo.findById(cartItemId);
+
+            if (optionalCartItem.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cart item not found");
             }
-            buyerCartRepo.delete(existing);
-            return ResponseEntity.ok("Item removed from cart.");
+
+            CartItem cartItem = optionalCartItem.get();
+
+            if (!cartItem.getBuyer().getEmail().equals(buyer.getEmail())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not allowed to delete this cart item");
+            }
+
+            buyerCartRepo.delete(cartItem);
+            return ResponseEntity.ok("Cart item removed successfully");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

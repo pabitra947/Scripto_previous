@@ -1,8 +1,9 @@
 package com.example.scripto.controller;
 
 import com.example.scripto.dto.BuyerCartItemDto;
+import com.example.scripto.dto.BuyerUpdateCartItemDto;
 import com.example.scripto.implementation.BuyerCartServiceImpl;
-import com.example.scripto.response.buyer.BuyerCartResponseDto;
+import com.example.scripto.response.buyer.BuyerCartResponse;
 import com.example.scripto.service.IBuyerCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,44 +15,36 @@ public class BuyerCartController {
 
 
     @Autowired
-    private IBuyerCart cartService;
+    private BuyerCartServiceImpl cartService;
 
 
     // for add book into cart
-    @PostMapping("/add-to-cart")
-    public ResponseEntity<BuyerCartItemDto> addToCart(
-            @RequestParam Long buyerId,
-            @RequestParam Long bookId,
-            @RequestParam(defaultValue = "1") int quantity) {
-        return cartService.addToCart(buyerId, bookId, quantity);
+    @PostMapping("/add")
+    public ResponseEntity<String> addToCart(@RequestBody BuyerCartItemDto request) {
+        return cartService.addToCart(request);
     }
 
 
 
     // only buyer see his cart item
-    @GetMapping("/{buyerId}")
-    public ResponseEntity<BuyerCartResponseDto> viewCart(@PathVariable Long buyerId) {
-        return cartService.getCartItemsWithTotal(buyerId);
+    @GetMapping("/see-all-book")
+    public ResponseEntity<BuyerCartResponse> viewCart() {
+        return cartService.viewCart();
     }
 
 
 
-    //
+    //update the quantity
     @PutMapping("/update")
-    public ResponseEntity<String> updateCartItem(
-            @RequestParam Long buyerId,
-            @RequestParam Long bookId,
-            @RequestParam int quantity) {
-        return cartService.updateCartItem(buyerId, bookId, quantity);
+    public ResponseEntity<String> updateCartItem(@RequestBody BuyerUpdateCartItemDto updateCartItemDto) {
+        return cartService.updateCartItem(updateCartItemDto);
     }
 
 
-
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> removeCartItem(
-            @RequestParam Long buyerId,
-            @RequestParam Long bookId) {
-        return cartService.removeCartItem(buyerId, bookId);
+    //delete the book from the cart
+    @DeleteMapping("/remove-item")
+    public ResponseEntity<String> removeCartItem(@RequestParam Long cartItemId) {
+        return cartService.removeCartItem(cartItemId);
     }
 }
 

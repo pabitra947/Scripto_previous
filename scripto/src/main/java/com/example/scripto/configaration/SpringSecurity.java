@@ -57,7 +57,7 @@ public class SpringSecurity {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(allWhitelist).permitAll()
                         .requestMatchers("/book-seller/**", "/seller-view/**").hasRole("SELLER")
-                        .requestMatchers("/buyer-view/**", "/buyer-book-wishlist/**").hasRole("BUYER")
+                        .requestMatchers("/buyer-view/**", "/buyer-book-wishlist/**", "/buyer-cart/**").hasRole("BUYER")
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())

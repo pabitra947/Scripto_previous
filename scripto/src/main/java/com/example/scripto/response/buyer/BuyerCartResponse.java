@@ -10,8 +10,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BuyerCartResponseDto {
+public class BuyerCartResponse {
 
-    private List<BuyerCartItemDto> items;  // List of items in the cart
+    private List<BuyerCartItemResponse> items;  // List of items in the cart
     private double totalPrice;             // Total price of all items
 }

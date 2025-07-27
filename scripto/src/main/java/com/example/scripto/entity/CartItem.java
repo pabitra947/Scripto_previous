@@ -1,10 +1,7 @@
 package com.example.scripto.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,14 +17,13 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "buyer_id", nullable = false)
-    private User buyer;  // Only buyers can add items
+    private User buyer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
-    private BookListing book; // Selected book
+    private BookListing book;
 
-    private int quantity; // How many copies of this book in cart
+    private int quantity; // Default quantity
 
     private LocalDateTime addedAt = LocalDateTime.now();
 }
-
