@@ -3,7 +3,7 @@ package com.example.scripto.controller;
 import com.example.scripto.response.seller.book.SellerBookResponseByAuthorName;
 import com.example.scripto.response.seller.book.SellerBookResponseByBookName;
 import com.example.scripto.response.seller.book.SellerBookResponse;
-import com.example.scripto.implementation.SellerSellerBookListingImpl;
+import com.example.scripto.implementation.SellerBookListingImpl;
 import com.example.scripto.response.seller.book.SellerBookResponseOnPrice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +16,7 @@ import java.util.List;
 public class SellerBookView {
 
     @Autowired
-    private SellerSellerBookListingImpl bookListing;
+    private SellerBookListingImpl bookListing;
 
 
 

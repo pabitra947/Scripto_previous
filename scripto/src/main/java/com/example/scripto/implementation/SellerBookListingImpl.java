@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class SellerSellerBookListingImpl implements ISellerBookListing {
+public class SellerBookListingImpl implements ISellerBookListing {
 //    private BookListing bookinformation = new BookListing();
     private ModelMapper modelMapper = new ModelMapper();
 

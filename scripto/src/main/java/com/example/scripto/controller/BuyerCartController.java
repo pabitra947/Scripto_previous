@@ -4,7 +4,6 @@ import com.example.scripto.dto.BuyerCartItemDto;
 import com.example.scripto.dto.BuyerUpdateCartItemDto;
 import com.example.scripto.implementation.BuyerCartServiceImpl;
 import com.example.scripto.response.buyer.BuyerCartResponse;
-import com.example.scripto.service.IBuyerCart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

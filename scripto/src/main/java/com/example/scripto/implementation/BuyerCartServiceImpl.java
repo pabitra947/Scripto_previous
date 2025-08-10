@@ -5,7 +5,7 @@ import com.example.scripto.dto.BuyerUpdateCartItemDto;
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.entity.CartItem;
 import com.example.scripto.entity.User;
-import com.example.scripto.repository.BuyerBookListingRepo;
+import com.example.scripto.repository.BuyerBookRepo;
 import com.example.scripto.repository.BuyerCartRepo;
 import com.example.scripto.repository.UserRepository;
 import com.example.scripto.response.buyer.BuyerCartItemResponse;
@@ -18,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +31,7 @@ public class BuyerCartServiceImpl implements IBuyerCart {
     private UserRepository userRepository;
 
     @Autowired
-    private BuyerBookListingRepo buyerBookListingRepo;
+    private BuyerBookRepo buyerBookRepo;
 
 
     //add the book into the cart
@@ -47,7 +46,7 @@ public class BuyerCartServiceImpl implements IBuyerCart {
 //                return ResponseEntity.status(403).body("Access denied: Only buyers can add to cart");
 //            }
 
-            Optional<BookListing> optionalBook = buyerBookListingRepo.findById(request.getBookId());
+            Optional<BookListing> optionalBook = buyerBookRepo.findById(request.getBookId());
             if (optionalBook.isEmpty()) {
                 return ResponseEntity.badRequest().body("Book not found");
             }
@@ -110,7 +109,6 @@ public class BuyerCartServiceImpl implements IBuyerCart {
                             book.getBookDetails(),
                             book.getPrice(),
                             ci.getQuantity(),
-                            book.getAvailableQuantity(),
                             itemTotal
                     );
                 })
@@ -163,7 +161,6 @@ public class BuyerCartServiceImpl implements IBuyerCart {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("Only " + available + " items available");
             }
-
             cartItem.setQuantity(updateCartItemDto.getQuantity());
             buyerCartRepo.save(cartItem);
 
@@ -174,6 +171,7 @@ public class BuyerCartServiceImpl implements IBuyerCart {
                     .body("Error while updating cart item: " + e.getMessage());
         }
     }
+
 
 
     //Used to delete the item from the cart

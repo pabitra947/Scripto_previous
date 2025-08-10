@@ -3,7 +3,7 @@ package com.example.scripto.controller;
 import com.example.scripto.dto.SellerBookDto;
 import com.example.scripto.dto.SellerEditBookDto;
 import com.example.scripto.entity.BookListing;
-import com.example.scripto.implementation.SellerSellerBookListingImpl;
+import com.example.scripto.implementation.SellerBookListingImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class SellerBookListingController {
 
     @Autowired
-    private SellerSellerBookListingImpl bookListing;
+    private SellerBookListingImpl bookListing;
 
 
 

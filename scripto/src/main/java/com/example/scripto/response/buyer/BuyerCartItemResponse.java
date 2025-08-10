@@ -16,6 +16,5 @@ public class BuyerCartItemResponse {
     private String bookDetails;
     private Double price;
     private int quantity;            // Quantity in cart
-    private int availableQuantity;   // Remaining in stock
     private Double totalPrice;
 }

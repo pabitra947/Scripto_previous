@@ -3,7 +3,7 @@ package com.example.scripto.implementation;
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.entity.User;
 import com.example.scripto.entity.Wishlist;
-import com.example.scripto.repository.BuyerBookListingRepo;
+import com.example.scripto.repository.BuyerBookRepo;
 import com.example.scripto.repository.UserRepository;
 import com.example.scripto.repository.BuyerWishlistRepository;
 import com.example.scripto.response.buyer.BuyerBookResponse;
@@ -15,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +29,7 @@ public class BuyerWishlistServiceImpl implements IBuyerWishList {
     private UserRepository userRepo;
 
     @Autowired
-    private BuyerBookListingRepo bookRepo;
+    private BuyerBookRepo bookRepo;
 
 
 

@@ -1,7 +1,7 @@
 package com.example.scripto.implementation;
 
 import com.example.scripto.entity.BookListing;
-import com.example.scripto.repository.BuyerBookListingRepo;
+import com.example.scripto.repository.BuyerBookRepo;
 import com.example.scripto.response.buyer.BuyerBookResponse;
 import com.example.scripto.service.IBuyerBooksSearch;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
 
     @Autowired
-    private BuyerBookListingRepo buyerBookListingRepo;
+    private BuyerBookRepo buyerBookRepo;
 
 
 
@@ -31,7 +31,7 @@ public class BuyerBookSearchServiceImpl implements IBuyerBooksSearch {
             String normalizedBook = (bookName != null && !bookName.isBlank()) ? bookName : null;
             String normalizedAuthor = (authorName != null && !authorName.isBlank()) ? authorName : null;
 
-            List<BookListing> listings = buyerBookListingRepo.searchByBookAndAuthorAndPrice(
+            List<BookListing> listings = buyerBookRepo.searchByBookAndAuthorAndPrice(
                     normalizedBook, normalizedAuthor, minPrice, maxPrice
             );
 

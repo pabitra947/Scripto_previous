@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface BuyerBookListingRepo extends JpaRepository<BookListing, Long> {
+public interface BuyerBookRepo extends JpaRepository<BookListing, Long> {
 
 
     //All task in one here
