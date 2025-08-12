@@ -1,6 +1,5 @@
-package com.example.scripto.response.buyer;
+package com.example.scripto.response.buyer.book;
 
-import com.example.scripto.dto.BuyerCartItemDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

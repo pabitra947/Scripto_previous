@@ -1,4 +1,4 @@
-package com.example.scripto.controller;
+package com.example.scripto.controller.seller;
 
 import com.example.scripto.dto.SellerBookDto;
 import com.example.scripto.dto.SellerEditBookDto;

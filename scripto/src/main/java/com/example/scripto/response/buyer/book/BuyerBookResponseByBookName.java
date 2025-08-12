@@ -1,4 +1,4 @@
-package com.example.scripto.response.buyer;
+package com.example.scripto.response.buyer.book;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

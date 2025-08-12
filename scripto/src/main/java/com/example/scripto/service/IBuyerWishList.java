@@ -1,7 +1,6 @@
 package com.example.scripto.service;
 
-import com.example.scripto.entity.Wishlist;
-import com.example.scripto.response.buyer.BuyerBookResponse;
+import com.example.scripto.response.buyer.book.BuyerBookResponse;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

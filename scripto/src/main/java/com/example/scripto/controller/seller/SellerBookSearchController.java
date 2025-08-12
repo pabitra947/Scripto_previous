@@ -1,4 +1,4 @@
-package com.example.scripto.controller;
+package com.example.scripto.controller.seller;
 
 import com.example.scripto.response.seller.book.SellerBookResponseByAuthorName;
 import com.example.scripto.response.seller.book.SellerBookResponseByBookName;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/seller-view")
-public class SellerBookView {
+public class SellerBookSearchController {
 
     @Autowired
     private SellerBookListingImpl bookListing;

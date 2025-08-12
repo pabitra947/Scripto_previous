@@ -52,12 +52,25 @@ public class SpringSecurity {
                 Arrays.stream(swaggerWhitelist)
         ).toArray(String[]::new);
 
+        String[] buyerApi = {
+                "/buyer-view/**",
+                "/buyer-book-wishlist/**",
+                "/buyer-cart/**",
+                "/buyer/order/**",
+                "/buyer/address/**"
+        };
+
+        String[] sellerApi = {
+                "/book-seller/**",
+                "/seller-view/**",
+                "/seller/orders/**"
+        };
 
         return http
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(allWhitelist).permitAll()
-                        .requestMatchers("/book-seller/**", "/seller-view/**").hasRole("SELLER")
-                        .requestMatchers("/buyer-view/**", "/buyer-book-wishlist/**", "/buyer-cart/**").hasRole("BUYER")
+                        .requestMatchers(sellerApi).hasRole("SELLER")
+                        .requestMatchers(buyerApi).hasRole("BUYER")
                         .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())

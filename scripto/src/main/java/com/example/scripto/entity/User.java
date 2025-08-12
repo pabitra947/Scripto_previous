@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.springframework.boot.autoconfigure.amqp.RabbitConnectionDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,7 +24,7 @@ public class User {
     private Long userId;
 
     @NonNull
-    private String fullName;  // ✅ New field for full name
+    private String fullName;
 
     @Column(unique = true)
     @NonNull
@@ -44,5 +46,10 @@ public class User {
     @OneToMany(mappedBy = "seller", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<BookListing> booksAdded;
+
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BuyerAddress> addresses = new ArrayList<>();
+
 
 }

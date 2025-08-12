@@ -6,7 +6,7 @@ import com.example.scripto.entity.Wishlist;
 import com.example.scripto.repository.BuyerBookRepo;
 import com.example.scripto.repository.UserRepository;
 import com.example.scripto.repository.BuyerWishlistRepository;
-import com.example.scripto.response.buyer.BuyerBookResponse;
+import com.example.scripto.response.buyer.book.BuyerBookResponse;
 import com.example.scripto.service.IBuyerWishList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

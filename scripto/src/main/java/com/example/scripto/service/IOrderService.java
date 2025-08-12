@@ -2,9 +2,15 @@ package com.example.scripto.service;
 
 import com.example.scripto.entity.Order;
 import com.example.scripto.entity.OrderItemStatus;
+import com.example.scripto.response.buyer.order.OrderResponse;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 public interface IOrderService {
-    Order placeOrder(); // builds an order from buyer's cart
+    ResponseEntity<Order> placeOrder(); // builds an order from buyer's cart
+
     ResponseEntity<String> updateOrderItemStatus(Long orderItemId, OrderItemStatus newStatus);
+
+    ResponseEntity<List<OrderResponse>> getOrderDetails();
 }

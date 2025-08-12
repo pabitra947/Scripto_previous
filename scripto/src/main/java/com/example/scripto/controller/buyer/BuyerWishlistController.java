@@ -1,8 +1,7 @@
-package com.example.scripto.controller;
+package com.example.scripto.controller.buyer;
 
-import com.example.scripto.entity.Wishlist;
 import com.example.scripto.implementation.BuyerWishlistServiceImpl;
-import com.example.scripto.response.buyer.BuyerBookResponse;
+import com.example.scripto.response.buyer.book.BuyerBookResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

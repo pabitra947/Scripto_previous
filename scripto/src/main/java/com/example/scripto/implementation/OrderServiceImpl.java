@@ -2,6 +2,8 @@ package com.example.scripto.implementation;
 
 import com.example.scripto.entity.*;
 import com.example.scripto.repository.*;
+import com.example.scripto.response.buyer.order.OrderItemResponse;
+import com.example.scripto.response.buyer.order.OrderResponse;
 import com.example.scripto.service.IOrderService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,17 +25,24 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired private SellerBookListingRepo bookRepo;
 
 
+
     // Create order from cart (buyerEmail from SecurityContext)
     @Override
     @Transactional
-    public Order placeOrder() {
+    public ResponseEntity<Order> placeOrder() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String buyerEmail = authentication.getName();
 
         User buyer = userRepo.findByEmail(buyerEmail);
 
+        if(buyer == null){
+            throw new RuntimeException("user is not found");
+        }
+
         List<CartItem> cartItems = cartRepo.findByBuyer(buyer);
-        if (cartItems.isEmpty()) throw new RuntimeException("Cart is empty");
+        if (cartItems.isEmpty()){
+            throw new RuntimeException("Cart is empty");
+        }
 
         Order order = new Order();
         order.setBuyer(buyer);
@@ -58,8 +67,9 @@ public class OrderServiceImpl implements IOrderService {
         cartRepo.deleteAll(cartItems);
 
         // TODO: notify sellers (e.g., push notifications)
-        return saved;
+        return new ResponseEntity<>(saved, HttpStatus.OK);
     }
+
 
 
 
@@ -131,6 +141,51 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Unsupported status");
+    }
+
+
+
+
+    //Used to seen all the order details this is the buyer functionality
+    public ResponseEntity<List<OrderResponse>> getOrderDetails(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String buyerEmail = authentication.getName();
+
+        if(buyerEmail == null){
+            throw new RuntimeException("The user is not found");
+        }
+
+        List<Order> orders = orderRepo.findByBuyerEmail(buyerEmail);
+
+        // Map entities to DTOs
+        List<OrderResponse> collect = orders.stream().map(this::toDto).collect(Collectors.toList());
+
+        return new ResponseEntity<>(collect, HttpStatus.OK);
+    }
+
+
+    private OrderResponse toDto(Order order) {
+        List<OrderItemResponse> items = order.getItems().stream()
+                .map(this::toItemDto)
+                .collect(Collectors.toList());
+
+        return new OrderResponse(
+                order.getOrderId(),
+                order.getOrderDate(),
+                order.getTotalAmount(),
+                items
+        );
+    }
+
+    private OrderItemResponse toItemDto(OrderItem item) {
+        return new OrderItemResponse(
+                item.getId(),
+                item.getBook().getBookId(),
+                item.getBook().getBookName(),
+                item.getPrice(),
+                item.getQuantity(),
+                item.getStatus()
+        );
     }
 }
 

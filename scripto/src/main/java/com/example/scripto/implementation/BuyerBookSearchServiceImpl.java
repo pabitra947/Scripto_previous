@@ -2,7 +2,7 @@ package com.example.scripto.implementation;
 
 import com.example.scripto.entity.BookListing;
 import com.example.scripto.repository.BuyerBookRepo;
-import com.example.scripto.response.buyer.BuyerBookResponse;
+import com.example.scripto.response.buyer.book.BuyerBookResponse;
 import com.example.scripto.service.IBuyerBooksSearch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

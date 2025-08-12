@@ -2,7 +2,7 @@ package com.example.scripto.service;
 
 import com.example.scripto.dto.BuyerCartItemDto;
 import com.example.scripto.dto.BuyerUpdateCartItemDto;
-import com.example.scripto.response.buyer.BuyerCartResponse;
+import com.example.scripto.response.buyer.book.BuyerCartResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface IBuyerCart {
