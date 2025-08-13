@@ -17,15 +17,19 @@ public class Order {
     private Long orderId;
 
     @ManyToOne
-    @JoinColumn(name = "buyer_id", nullable = false)
+    @JoinColumn(name = "buyer_id")
     private User buyer;
 
-    private LocalDateTime orderDate = LocalDateTime.now();
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private BuyerAddress address;  // Chosen delivery address
 
-    private Double totalAmount;
+    private double totalAmount;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> items;
+
+    private LocalDateTime orderDate = LocalDateTime.now();
 
     // Convenience: derive a simple order-level state (optional)
     public boolean allItemsConfirmed() {

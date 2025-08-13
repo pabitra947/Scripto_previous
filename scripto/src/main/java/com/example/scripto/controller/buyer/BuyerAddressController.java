@@ -27,7 +27,7 @@ public class BuyerAddressController {
         return buyerAddressService.getAddress();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<String> updateAddress(@PathVariable Long id,
                                                 @RequestBody BuyerAddress updatedAddress) {
         return buyerAddressService.updateAddress(id, updatedAddress);

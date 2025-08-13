@@ -23,35 +23,43 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired private BuyerCartRepo cartRepo;
     @Autowired private UserRepository userRepo;
     @Autowired private SellerBookListingRepo bookRepo;
+    @Autowired private BuyerAddressRepo addressRepo;
 
 
 
     // Create order from cart (buyerEmail from SecurityContext)
     @Override
     @Transactional
-    public ResponseEntity<Order> placeOrder() {
+    public ResponseEntity<String> placeOrder(Long addressId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String buyerEmail = authentication.getName();
 
         User buyer = userRepo.findByEmail(buyerEmail);
+        if (buyer == null) {
+            throw new RuntimeException("User not found");
+        }
 
-        if(buyer == null){
-            throw new RuntimeException("user is not found");
+        // Check if selected address belongs to user
+        BuyerAddress selectedAddress = addressRepo.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address not found"));
+        if (!selectedAddress.getUser().equals(buyer)) {
+            throw new RuntimeException("Invalid address selection");
         }
 
         List<CartItem> cartItems = cartRepo.findByBuyer(buyer);
-        if (cartItems.isEmpty()){
+        if (cartItems.isEmpty()) {
             throw new RuntimeException("Cart is empty");
         }
 
         Order order = new Order();
         order.setBuyer(buyer);
+        order.setAddress(selectedAddress); // Save selected address
 
         List<OrderItem> items = cartItems.stream().map(ci -> {
             OrderItem oi = new OrderItem();
             oi.setBook(ci.getBook());
             oi.setQuantity(ci.getQuantity());
-            oi.setPrice(ci.getBook().getPrice()); // snapshot
+            oi.setPrice(ci.getBook().getPrice());
             oi.setStatus(OrderItemStatus.PENDING);
             oi.setOrder(order);
             return oi;
@@ -63,11 +71,10 @@ public class OrderServiceImpl implements IOrderService {
 
         Order saved = orderRepo.save(order);
 
-        // optionally clear cart after placing (or keep until confirmed)
+        // Clear cart
         cartRepo.deleteAll(cartItems);
 
-        // TODO: notify sellers (e.g., push notifications)
-        return new ResponseEntity<>(saved, HttpStatus.OK);
+        return new ResponseEntity<>("Order placed successfully with ID: " + saved.getOrderId(), HttpStatus.OK);
     }
 
 
@@ -146,7 +153,7 @@ public class OrderServiceImpl implements IOrderService {
 
 
 
-    //Used to seen all the order details this is the buyer functionality
+    //Used to see all the order details this is the buyer functionality
     public ResponseEntity<List<OrderResponse>> getOrderDetails(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String buyerEmail = authentication.getName();

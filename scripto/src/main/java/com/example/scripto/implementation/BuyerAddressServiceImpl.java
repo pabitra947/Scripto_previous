@@ -8,21 +8,18 @@ import com.example.scripto.response.buyer.address.BuyerAddressResponse;
 import com.example.scripto.service.IBuyerAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class BuyerAddressServiceImpl implements IBuyerAddress {
 
-    @Autowired
-    private BuyerAddressRepo addressRepo;
-
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private BuyerAddressRepo addressRepo;
+    @Autowired private UserRepository userRepository;
 
 
     //Used to save the address
@@ -81,7 +78,7 @@ public class BuyerAddressServiceImpl implements IBuyerAddress {
                 .orElseThrow(() -> new RuntimeException("Address not found"));
 
         if (!existingAddress.getUser().getEmail().equals(buyerEmail)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("You can only update your own address");
         }
 

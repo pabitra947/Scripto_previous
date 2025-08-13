@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface IOrderService {
-    ResponseEntity<Order> placeOrder(); // builds an order from buyer's cart
+    ResponseEntity<String> placeOrder(Long addressId); // builds an order from buyer's cart
 
     ResponseEntity<String> updateOrderItemStatus(Long orderItemId, OrderItemStatus newStatus);
 
