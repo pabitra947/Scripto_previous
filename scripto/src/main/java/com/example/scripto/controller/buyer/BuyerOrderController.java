@@ -25,7 +25,6 @@ public class BuyerOrderController {
 
 
     //used to get the order state and details
-    //Used this
     @GetMapping("/my")
     public ResponseEntity<List<OrderResponse>> getMyOrders() {
         return orderService.getOrderDetails();
